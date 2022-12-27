@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">My Audio Recorder</string>
+    <string name="demoTimerText">00:00.00</string>
+    <string name="delete_button">Delete Button</string>
+    <string name="record_button">Record Button</string>
+    <string name="list_button">List Button</string>
+    <string name="done_button">Done Button</string>
+</resources>
