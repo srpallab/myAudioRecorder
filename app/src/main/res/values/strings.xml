@@ -5,4 +5,7 @@
     <string name="record_button">Record Button</string>
     <string name="list_button">List Button</string>
     <string name="done_button">Done Button</string>
+    <string name="save_record">Save Record?</string>
+    <string name="cancel">Cancel</string>
+    <string name="okay">Okay</string>
 </resources>
