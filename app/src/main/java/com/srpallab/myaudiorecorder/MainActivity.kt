@@ -92,6 +92,8 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
                 isRecording -> pauseRecording()
                 else -> startRecording()
             }
+            btnDelete.isClickable = true
+            btnDelete.setImageResource(R.drawable.ic_delete)
             vibrator.vibrate(VibrationEffect.createOneShot(
                 50, VibrationEffect.DEFAULT_AMPLITUDE)
             )
@@ -110,6 +112,7 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
         }
 
         btnCancel.setOnClickListener {
+            println("$dirPath$fileName.mp3")
             File("$dirPath$fileName.mp3").delete()
             dismiss()
         }
