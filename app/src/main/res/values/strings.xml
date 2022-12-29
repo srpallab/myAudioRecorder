@@ -8,4 +8,12 @@
     <string name="save_record">Save Record?</string>
     <string name="cancel">Cancel</string>
     <string name="okay">Okay</string>
+    <string name="example_file_name_mp3">Examle File Name.mp3</string>
+    <string name="play_button">Play Button</string>
+    <string name="x_1_0">x 1.0</string>
+    <string name="forward_5_second">Forward 5 second</string>
+    <string name="backward_5_second">Backward 5 second</string>
+    <string name="search_audio_record">Search Audio Record</string>
+    <string name="close_edit_mode">Close Edit Mode</string>
+    <string name="select_all_items">Select All Items</string>
 </resources>

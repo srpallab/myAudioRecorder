@@ -1,21 +1,29 @@
 package com.srpallab.myaudiorecorder
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.os.*
+import android.provider.MediaStore.Audio
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.room.Room
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.bottom_sheet.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.ObjectOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,6 +41,8 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
     private lateinit var timer: Timer
     private lateinit var vibrator: Vibrator
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+    private lateinit var db : AppDatabase
+    private var duration = ""
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +58,12 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
         } else{
             requestPermissions(permissions, REQUEST_CODE)
         }
+
+        db = Room.databaseBuilder(
+            this,
+            AppDatabase::class.java,
+            "audioRecords"
+        ).build()
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.peekHeight = 0
@@ -82,7 +98,7 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
         }
 
         btnList.setOnClickListener{
-            Toast.makeText(this, "Record List Button", Toast.LENGTH_LONG).show()
+            startActivity(Intent(this, GalleryActivity::class.java))
         }
 
         btnDone.setOnClickListener {
@@ -173,6 +189,7 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
         btnDone.visibility = View.VISIBLE
     }
 
+    @SuppressLint("SetTextI18n")
     private fun stopRecording(){
         timer.stop()
         recorder.apply {
@@ -189,13 +206,14 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
         btnDelete.setImageResource(R.drawable.ic_delete_disabled)
         btnRecord.setImageResource(R.drawable.ic_record)
 
-        tvTimer.text = R.string.demoTimerText.toString()
+        tvTimer.text = "00:00.00"
         amplitudes = waveformView.clear()
     }
 
     override fun onTimerTick(duration: String) {
         println(duration)
         tvTimer.text = duration
+        this.duration = duration.dropLast(3)
         waveformView.addAmplitude(recorder.maxAmplitude.toFloat())
     }
 
@@ -215,12 +233,32 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
             100)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun save(){
         val newFileName = fileNameInput.text.toString()
         if(fileName != newFileName) {
             val newFile = File("$dirPath$fileName.mp3")
             File("$dirPath$fileName.mp3").renameTo(newFile)
         }
+        tvTimer.text = "00:00.00"
 
+        var filePath = "$dirPath$fileName.mp3"
+        val timestamp = Date().time
+        val ampsPath = "$dirPath$fileName"
+
+        try {
+            var fileOutputStream = FileOutputStream(ampsPath)
+            var out = ObjectOutputStream(fileOutputStream)
+            out.writeObject(amplitudes)
+            fileOutputStream.close()
+            out.close()
+        } catch (e: IOException){
+            println(e)
+        }
+
+        var record = AudioRecord(newFileName, filePath, timestamp, duration, ampsPath)
+        GlobalScope.launch {
+            db.audioRecordDao().insert(record)
+        }
     }
 }
